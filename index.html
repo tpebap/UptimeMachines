@@ -84,7 +84,7 @@ async function loadMachines() {
             tbody.appendChild(tr);
         });
     } catch(e) {
-        console.error(e);
+        console.error("Error loading machines:", e);
     }
 }
 
@@ -97,10 +97,11 @@ async function loadStats() {
         document.getElementById('liveMachines').textContent = stats.live_machines;
         document.getElementById('totalUptime').textContent = `${Math.floor(stats.total_uptime/86400)} Days`;
     } catch(e) {
-        console.error(e);
+        console.error("Error loading stats:", e);
     }
 }
 
+// Зареждане първо + refresh на всеки 5 сек
 loadMachines();
 loadStats();
 setInterval(loadMachines, 5000);
