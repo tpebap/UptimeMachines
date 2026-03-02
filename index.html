@@ -2,71 +2,110 @@
 <html lang="bg">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.tailwindcss.com"></script>
-<title>UptimeMachines | Global Leaderboard</title>
+<title>Uptime Machines | Global Leaderboard</title>
 </head>
 <body class="bg-[#0b0f1a] text-gray-100 font-sans selection:bg-cyan-500">
 
-<div class="max-w-4xl mx-auto px-4 py-12">
-    <div class="text-center mb-8">
-        <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
-            UPTIME MACHINES
-        </h1>
-        <p class="text-gray-500 uppercase text-sm tracking-widest mt-2">World Ranking System</p>
-    </div>
+<div class="max-w-6xl mx-auto px-4 py-12">
 
-    <div class="overflow-x-auto">
-        <table class="w-full text-left">
-            <thead class="bg-slate-800/50 text-xs uppercase tracking-widest text-gray-400">
-                <tr>
-                    <th class="p-4">Rank</th>
-                    <th class="p-4">Machine Name</th>
-                    <th class="p-4">Uptime</th>
-                    <th class="p-4">Status</th>
-                </tr>
-            </thead>
-            <tbody id="machine-table-body" class="divide-y divide-slate-700">
-                <!-- JS ще попълва -->
-            </tbody>
-        </table>
+<h1 class="text-5xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 drop-shadow-sm text-center mb-16">
+UPTIME MACHINES
+</h1>
+<p class="text-center text-gray-500 uppercase tracking-[0.3em] text-sm mb-12">World Ranking Systems</p>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+    <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 backdrop-blur-xl">
+        <p class="text-gray-500 text-xs uppercase mb-1">Total Machines</p>
+        <p id="totalMachines" class="text-2xl font-bold text-cyan-400 tracking-wider">0</p>
+    </div>
+    <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 backdrop-blur-xl">
+        <p class="text-gray-500 text-xs uppercase mb-1">Total Uptime</p>
+        <p id="totalUptime" class="text-2xl font-bold text-blue-400 tracking-wider">0 Days</p>
+    </div>
+    <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 backdrop-blur-xl">
+        <p class="text-gray-500 text-xs uppercase mb-1">Live Now</p>
+        <p id="liveMachines" class="text-2xl font-bold text-green-400 tracking-wider animate-pulse">0</p>
     </div>
 </div>
 
+<div class="bg-slate-900/40 rounded-3xl border border-slate-800 overflow-hidden backdrop-blur-md shadow-2xl">
+    <table class="w-full text-left">
+        <thead class="bg-slate-800/50 text-xs uppercase tracking-widest text-gray-500">
+            <tr>
+                <th class="p-6">Rank</th>
+                <th class="p-6">Machine Name</th>
+                <th class="p-6">Uptime</th>
+                <th class="p-6 text-right">Status</th>
+            </tr>
+        </thead>
+        <tbody id="machinesTable" class="divide-y divide-slate-800"></tbody>
+    </table>
+</div>
+
+<div class="mt-12 flex justify-center gap-4">
+    <button class="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-cyan-400 transition-all active:scale-95 shadow-xl">
+        Get Client v1.0
+    </button>
+</div>
+
 <script>
+function formatUptime(seconds) {
+    const days = Math.floor(seconds / 86400);
+    seconds %= 86400;
+    const hours = Math.floor(seconds / 3600);
+    seconds %= 3600;
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${days}:${hours}:${minutes}:${secs}`;
+}
+
 async function loadMachines() {
-    const res = await fetch("https://devilshell.eu.org/api/machines");
-    const machines = await res.json();
-    const tbody = document.getElementById("machine-table-body");
-    tbody.innerHTML = "";
+    try {
+        const res = await fetch('https://devilshell.eu.org:8080/api/machines');
+        const data = await res.json();
 
-    machines.forEach((m,index)=>{
-        const tr = document.createElement("tr");
-        tr.className = "hover:bg-gray-800 transition-colors";
+        const tbody = document.getElementById('machinesTable');
+        tbody.innerHTML = '';
 
-        const statusColor = m.status === "Online" ? "bg-green-500" : "bg-red-500";
+        data.forEach((m, idx) => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-cyan-500/5 transition-colors group';
 
-        tr.innerHTML = `
-            <td class="p-4 font-mono">#${index+1}</td>
-            <td class="p-4 font-bold">${m.name}<div class="text-xs text-gray-400">Machine Info</div></td>
-            <td class="p-4 font-mono">${formatUptime(m.total_seconds)}</td>
-            <td class="p-4 text-right">
-                <span class="inline-block w-3 h-3 rounded-full ${statusColor} shadow-[0_0_10px_rgba(34,197,94,0.6)]"></span>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
+            const statusColor = m.status === 'Online' ? 'text-green-400' : 'text-red-400';
+
+            tr.innerHTML = `
+                <td class="p-6 font-mono text-cyan-400 text-lg">#${idx+1}</td>
+                <td class="p-6 font-bold text-lg">${m.name}<div class="text-xs text-gray-500">Machine Info</div></td>
+                <td class="p-6 font-mono text-blue-400 text-lg">${formatUptime(m.total_seconds)}</td>
+                <td class="p-6 text-right ${statusColor} font-bold">${m.status}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch(e) {
+        console.error(e);
+    }
 }
 
-function formatUptime(totalSeconds){
-    let s = totalSeconds;
-    const days = Math.floor(s/86400); s%=86400;
-    const hours = Math.floor(s/3600); s%=3600;
-    const mins = Math.floor(s/60); s%=60;
-    return `${days}:${hours}:${mins}:${s}`;
+async function loadStats() {
+    try {
+        const res = await fetch('https://devilshell.eu.org:8080/api/stats');
+        const stats = await res.json();
+
+        document.getElementById('totalMachines').textContent = stats.total_machines;
+        document.getElementById('liveMachines').textContent = stats.live_machines;
+        document.getElementById('totalUptime').textContent = `${Math.floor(stats.total_uptime/86400)} Days`;
+    } catch(e) {
+        console.error(e);
+    }
 }
 
-setInterval(loadMachines, 10000);
 loadMachines();
+loadStats();
+setInterval(loadMachines, 5000);
+setInterval(loadStats, 5000);
 </script>
+
 </body>
 </html>
