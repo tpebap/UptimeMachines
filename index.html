@@ -24,7 +24,7 @@
             </div>
             <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 backdrop-blur-xl">
                 <p class="text-gray-500 text-xs uppercase mb-1">Total Online Time</p>
-                <p id="total-time" class="text-2xl font-bold text-blue-400 tracking-wider">0h</p>
+                <p id="total-time" class="text-2xl font-bold text-blue-400 tracking-wider">0 Days</p>
             </div>
             <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 backdrop-blur-xl">
                 <p class="text-gray-500 text-xs uppercase mb-1">Live Now</p>
@@ -59,9 +59,11 @@
 
     <!-- JavaScript за динамично зареждане -->
     <script>
+    const BACKEND_URL = 'https://devilshell.eu.org/api/machines'; // Абсолютен HTTPS URL на backend
+
     async function loadMachines() {
         try {
-            const res = await fetch('http://devilshell.eu.org:8080/api/machines');
+            const res = await fetch(BACKEND_URL);
             const machines = await res.json();
 
             const tableBody = document.getElementById('machine-table');
@@ -75,7 +77,9 @@
             let totalTimeSeconds = 0;
 
             machines.forEach((m, index) => {
-                const statusColor = m.status === 'Online' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.6)]';
+                const statusColor = m.status === 'Online'
+                    ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]'
+                    : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.6)]';
                 if (m.status === 'Online') liveCount++;
 
                 totalTimeSeconds += m.total_seconds;
@@ -109,7 +113,7 @@
             totalTimeElem.textContent = `${totalDays} Days`;
 
         } catch (err) {
-            console.error(err);
+            console.error('Failed to load machines:', err);
         }
     }
 
